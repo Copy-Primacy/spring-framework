@@ -52,6 +52,13 @@ public interface ViewResolver {
 	 * @throws Exception if the view cannot be resolved
 	 * (typically in case of problems creating an actual View object)
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 根据视图名和国际化，转换成 View 对象
+	 * @Date 10:09 2019/9/19
+	 * @Param [viewName, locale]
+	 * @return org.springframework.web.servlet.View
+	 **/
 	@Nullable
 	View resolveViewName(String viewName, Locale locale) throws Exception;
 

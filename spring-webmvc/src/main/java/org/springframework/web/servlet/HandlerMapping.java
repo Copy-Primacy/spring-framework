@@ -144,6 +144,13 @@ public interface HandlerMapping {
 	 * any interceptors, or {@code null} if no mapping found
 	 * @throws Exception if there is an internal error
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 根据请求获取对应的处理器和拦截器组
+	 * @Date 9:55 2019/9/19
+	 * @Param [request]
+	 * @return org.springframework.web.servlet.HandlerExecutionChain
+	 **/
 	@Nullable
 	HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception;
 

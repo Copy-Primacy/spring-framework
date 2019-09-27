@@ -138,6 +138,13 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 	 * @see WebApplicationInitializer#onStartup(ServletContext)
 	 * @see AnnotationAwareOrderComparator
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description Spring的ServletContainerInitializer实现类
+	 * @Date 17:18 2019/9/18
+	 * @Param [webAppInitializerClasses, servletContext]
+	 * @return void
+	 **/
 	@Override
 	public void onStartup(@Nullable Set<Class<?>> webAppInitializerClasses, ServletContext servletContext)
 			throws ServletException {
@@ -148,6 +155,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 			for (Class<?> waiClass : webAppInitializerClasses) {
 				// Be defensive: Some servlet containers provide us with invalid classes,
 				// no matter what @HandlesTypes says...
+				//***对加载的类进行了特判***
 				if (!waiClass.isInterface() && !Modifier.isAbstract(waiClass.getModifiers()) &&
 						WebApplicationInitializer.class.isAssignableFrom(waiClass)) {
 					try {
@@ -169,6 +177,7 @@ public class SpringServletContainerInitializer implements ServletContainerInitia
 		servletContext.log(initializers.size() + " Spring WebApplicationInitializers detected on classpath");
 		AnnotationAwareOrderComparator.sort(initializers);
 		for (WebApplicationInitializer initializer : initializers) {
+			//***真正的用来注册servlet和filter的 接口，由其实现类去实现相应逻辑***
 			initializer.onStartup(servletContext);
 		}
 	}

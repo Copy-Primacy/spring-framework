@@ -58,9 +58,18 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	public static final String DEFAULT_SERVLET_NAME = "dispatcher";
 
 
+	/**
+	 * @Author MTSS
+	 * @Description 在无 web.xml的前提下去创建DispatcherServlet
+	 * @Date 16:19 2019/9/18
+	 * @Param [servletContext]
+	 * @return void
+	 **/
 	@Override
 	public void onStartup(ServletContext servletContext) throws ServletException {
+		//***调用父类的启动逻辑***
 		super.onStartup(servletContext);
+		//***注册DispatcherServlet***
 		registerDispatcherServlet(servletContext);
 	}
 
@@ -75,13 +84,21 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 * {@link #createDispatcherServlet(WebApplicationContext)}.
 	 * @param servletContext the context to register the servlet against
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 创建DispatcherServlet的核心代码
+	 * @Date 17:46 2019/9/18
+	 * @Param [servletContext]
+	 * @return void
+	 **/
 	protected void registerDispatcherServlet(ServletContext servletContext) {
+		//获取Servlet名
 		String servletName = getServletName();
 		Assert.hasLength(servletName, "getServletName() must not return null or empty");
-
+        //***创建WebApplicationContext 对象***
 		WebApplicationContext servletAppContext = createServletApplicationContext();
 		Assert.notNull(servletAppContext, "createServletApplicationContext() must not return null");
-
+        //***创建FrameworkServlet 对象***
 		FrameworkServlet dispatcherServlet = createDispatcherServlet(servletAppContext);
 		Assert.notNull(dispatcherServlet, "createDispatcherServlet(WebApplicationContext) must not return null");
 		dispatcherServlet.setContextInitializers(getServletApplicationContextInitializers());
@@ -95,7 +112,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 		registration.setLoadOnStartup(1);
 		registration.addMapping(getServletMappings());
 		registration.setAsyncSupported(isAsyncSupported());
-
+        //***注册过滤器***
 		Filter[] filters = getServletFilters();
 		if (!ObjectUtils.isEmpty(filters)) {
 			for (Filter filter : filters) {

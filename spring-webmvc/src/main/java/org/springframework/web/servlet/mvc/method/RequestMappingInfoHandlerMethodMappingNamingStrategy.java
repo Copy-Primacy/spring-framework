@@ -38,12 +38,20 @@ public class RequestMappingInfoHandlerMethodMappingNamingStrategy
 	/** Separator between the type and method-level parts of a HandlerMethod mapping name. */
 	public static final String SEPARATOR = "#";
 
-
+    /**
+     * @Author MTSS
+     * @Description mapping -> handler
+     * @Date 11:44 2019/9/27
+     * @Param [handlerMethod, mapping]
+     * @return java.lang.String
+     **/
 	@Override
 	public String getName(HandlerMethod handlerMethod, RequestMappingInfo mapping) {
+		//***如果mapping的名字非空，使用mapping的名字***
 		if (mapping.getName() != null) {
 			return mapping.getName();
 		}
+		//***否则，使用类名大写 + "#" + 方法名***
 		StringBuilder sb = new StringBuilder();
 		String simpleTypeName = handlerMethod.getBeanType().getSimpleName();
 		for (int i = 0; i < simpleTypeName.length(); i++) {

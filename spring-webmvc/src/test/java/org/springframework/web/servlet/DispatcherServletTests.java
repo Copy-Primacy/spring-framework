@@ -106,6 +106,20 @@ public class DispatcherServletTests {
 		return servletConfig.getServletContext();
 	}
 
+	/**
+	 * @Author MTSS
+	 * @Description
+	 * 初始化Servlet WebApplicationContext
+	 * HttpServletBean
+	 *    负责将ServletConfig设置到Servlet对象中
+	 * FrameworkServlet
+	 *    负责初始化Spring Servlet WebApplicationContext容器
+	 * DispatcherServlet
+	 *    负责初始化Spring MVC各个组件以及处理客户端请求
+	 * @Date 16:14 2019/9/11
+	 * @Param []
+	 * @return void
+	 **/
 	@Test
 	public void configuredDispatcherServlets() {
 		assertThat(("simple" + FrameworkServlet.DEFAULT_NAMESPACE_SUFFIX).equals(simpleDispatcherServlet.getNamespace())).as("Correct namespace").isTrue();

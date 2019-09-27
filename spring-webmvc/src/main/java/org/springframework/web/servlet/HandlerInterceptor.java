@@ -73,6 +73,13 @@ import org.springframework.web.method.HandlerMethod;
  * @see org.springframework.web.servlet.theme.ThemeChangeInterceptor
  * @see javax.servlet.Filter
  */
+/**
+ * @Author MTSS
+ * @Description Spring MVC的拦截器
+ * @Date 10:40 2019/9/26
+ * @Param
+ * @return
+ **/
 public interface HandlerInterceptor {
 
 	/**
@@ -94,6 +101,13 @@ public interface HandlerInterceptor {
 	 * that this interceptor has already dealt with the response itself.
 	 * @throws Exception in case of errors
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 拦截器 前置功能
+	 * @Date 10:40 2019/9/26
+	 * @Param [request, response, handler]
+	 * @return boolean
+	 **/
 	default boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
 			throws Exception {
 
@@ -120,6 +134,13 @@ public interface HandlerInterceptor {
 	 * (can also be {@code null})
 	 * @throws Exception in case of errors
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 拦截器 后置功能
+	 * @Date 10:40 2019/9/26
+	 * @Param [request, response, handler, modelAndView]
+	 * @return void
+	 **/
 	default void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler,
 			@Nullable ModelAndView modelAndView) throws Exception {
 	}
@@ -145,6 +166,13 @@ public interface HandlerInterceptor {
 	 * include exceptions that have been handled through an exception resolver
 	 * @throws Exception in case of errors
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 善后处理（无论拦截器执行成功还是失败，均执行此步操作）
+	 * @Date 10:41 2019/9/26
+	 * @Param [request, response, handler, ex]
+	 * @return void
+	 **/
 	default void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler,
 			@Nullable Exception ex) throws Exception {
 	}

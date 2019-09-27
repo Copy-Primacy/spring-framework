@@ -167,25 +167,39 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 		return this.cacheFilter;
 	}
 
+	/**
+	 * @Author MTSS
+	 * @Description 渲染方法
+	 * @Date 10:51 2019/9/25
+	 * @Param [viewName, locale]
+	 * @return org.springframework.web.servlet.View
+	 **/
 	@Override
 	@Nullable
 	public View resolveViewName(String viewName, Locale locale) throws Exception {
 		if (!isCache()) {
+			//***如果再缓存中不存在，则直接创建视图***
 			return createView(viewName, locale);
 		}
 		else {
+			//***从缓存中获取视图***
 			Object cacheKey = getCacheKey(viewName, locale);
+			//***从viewAccessCache中获取视图***
 			View view = this.viewAccessCache.get(cacheKey);
 			if (view == null) {
 				synchronized (this.viewCreationCache) {
+					//***从viewCreationCache中获取视图***
 					view = this.viewCreationCache.get(cacheKey);
 					if (view == null) {
 						// Ask the subclass to create the View object.
+						//***创建视图***
 						view = createView(viewName, locale);
 						if (view == null && this.cacheUnresolved) {
+							//***使用UNRESOLVED_VIEW***
 							view = UNRESOLVED_VIEW;
 						}
 						if (view != null && this.cacheFilter.filter(view, viewName, locale)) {
+							//***更新缓存中的视图***
 							this.viewAccessCache.put(cacheKey, view);
 							this.viewCreationCache.put(cacheKey, view);
 						}
@@ -272,6 +286,7 @@ public abstract class AbstractCachingViewResolver extends WebApplicationObjectSu
 	 */
 	@Nullable
 	protected View createView(String viewName, Locale locale) throws Exception {
+		//***新建视图***
 		return loadView(viewName, locale);
 	}
 

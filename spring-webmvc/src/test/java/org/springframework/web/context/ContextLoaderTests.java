@@ -22,6 +22,7 @@ import java.io.IOException;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
+import javax.servlet.ServletException;
 
 import org.junit.jupiter.api.Test;
 
@@ -60,17 +61,40 @@ import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
  */
 public class ContextLoaderTests {
 
+	/***
+	 * @Author MTSS
+	 * @Description
+	 * 1 web.xml
+	 *   1.1 org.springframework.web.context.ContextLoaderListener
+	 *       作用：初始化一个Root WebApplicationContext容器
+	 *       关键：
+	 *         ServletContextListener（接口），调用实现类
+	 *         ContextLoader（父类）->初始化或者销毁容器等操作（重用）
+	 *   1.2 org.springframework.web.servlet.DispatcherServlet
+	 *       作用：初始化多个WebApplicationContext容器
+	 *
+	 * @Date 15:46 2019/9/10
+	 * @Param []
+	 * @return void
+	 **/
 	@Test
 	public void testContextLoaderListenerWithDefaultContext() {
+		//***MockServletContext用来初始化WebApplicationContext容器配置***
 		MockServletContext sc = new MockServletContext("");
+		//***将配置文件地址储存到MockServletContext里的Map中***
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml " +
 				"/org/springframework/web/context/WEB-INF/context-addition.xml");
+		//***ContextLoaderListener是用来真正创建Root WebApplicationContext***
 		ServletContextListener listener = new ContextLoaderListener();
+		//***创建容器的环境，可获取到Servlet的上下文***
 		ServletContextEvent event = new ServletContextEvent(sc);
+		//***初始化 Root WebApplicationContext 容器操作***
 		listener.contextInitialized(event);
 		String contextAttr = WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE;
+		//***获取新创建的Root 容器***
 		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(contextAttr);
+		//***各种校验***
 		boolean condition1 = context instanceof XmlWebApplicationContext;
 		assertThat(condition1).as("Correct WebApplicationContext exposed in ServletContext").isTrue();
 		assertThat(WebApplicationContextUtils.getRequiredWebApplicationContext(sc) instanceof XmlWebApplicationContext).isTrue();
@@ -290,7 +314,7 @@ public class ContextLoaderTests {
 	}
 
 	@Test
-	public void testFrameworkServletWithCustomLocation() throws Exception {
+	public void testFrameworkServletWithCustomLocation() throws Exception, ServletException {
 		DispatcherServlet servlet = new DispatcherServlet();
 		servlet.setContextConfigLocation("/org/springframework/web/context/WEB-INF/testNamespace.xml "
 				+ "/org/springframework/web/context/WEB-INF/context-addition.xml");

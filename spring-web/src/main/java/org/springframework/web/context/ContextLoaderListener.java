@@ -90,6 +90,16 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	 * @see #contextInitialized(ServletContextEvent)
 	 * @see #contextDestroyed(ServletContextEvent)
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description Q：为什么需要手动创建这两个构造器呢？使用默认的不好吗？？？
+	 * A：
+	 * 1 不可以使用默认的构造器，因为它的父类创建了两个构造器，如果子类不去调用，父类创建的构造器就没有意义了。
+	 * 2 如果使用了此构造器，手动传入一个WebApplicationContext，就不需要再去创建新的容器了。
+	 * @Date 16:21 2019/9/16
+	 * @Param [context]
+	 * @return
+	 **/
 	public ContextLoaderListener(WebApplicationContext context) {
 		super(context);
 	}
@@ -98,6 +108,15 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	/**
 	 * Initialize the root web application context.
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description
+	 * 使用Spring上下文创建Root WebApplicationContext容器
+	 * 容器的创建功能是由父类ContextLoader提供的
+	 * @Date 15:58 2019/9/10
+	 * @Param [event]
+	 * @return void
+	 **/
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
 		initWebApplicationContext(event.getServletContext());
@@ -107,8 +126,16 @@ public class ContextLoaderListener extends ContextLoader implements ServletConte
 	/**
 	 * Close the root web application context.
 	 */
+    /**
+     * @Author MTSS
+     * @Description 销毁Root WebApplicationContext容器
+     * @Date 16:07 2019/9/10
+     * @Param [event]
+     * @return void
+     **/
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
+		//***在Servlet上下文中删除容器***
 		closeWebApplicationContext(event.getServletContext());
 		ContextCleanupListener.cleanupAttributes(event.getServletContext());
 	}

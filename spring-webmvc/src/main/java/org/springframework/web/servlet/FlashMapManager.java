@@ -42,6 +42,13 @@ public interface FlashMapManager {
 	 * @param response the current response
 	 * @return a FlashMap matching the current request or {@code null}
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 恢复参数，并将恢复过的和超时的参数从保存的介质中删除 
+	 * @Date 10:13 2019/9/19
+	 * @Param [request, response]
+	 * @return org.springframework.web.servlet.FlashMap
+	 **/
 	@Nullable
 	FlashMap retrieveAndUpdate(HttpServletRequest request, HttpServletResponse response);
 
@@ -55,6 +62,13 @@ public interface FlashMapManager {
 	 * @param request the current request
 	 * @param response the current response
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 将参数保存起来
+	 * @Date 10:14 2019/9/19
+	 * @Param [flashMap, request, response]
+	 * @return void
+	 **/
 	void saveOutputFlashMap(FlashMap flashMap, HttpServletRequest request, HttpServletResponse response);
 
 }

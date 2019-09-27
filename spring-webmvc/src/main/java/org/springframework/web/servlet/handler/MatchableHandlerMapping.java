@@ -30,6 +30,13 @@ import org.springframework.web.servlet.HandlerMapping;
  * @since 4.3.1
  * @see HandlerMappingIntrospector
  */
+/**
+ * @Author MTSS
+ * @Description 匹配请求路径（pattern）
+ * @Date 10:25 2019/9/26
+ * @Param
+ * @return
+ **/
 public interface MatchableHandlerMapping extends HandlerMapping {
 
 	/**

@@ -96,10 +96,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 
 
 	private boolean detectHandlerMethodsInAncestorContexts = false;
-
+    //***Mapping 命名策略***
 	@Nullable
 	private HandlerMethodMappingNamingStrategy<T> namingStrategy;
-
+	//***Mapping 注册类***
 	private final MappingRegistry mappingRegistry = new MappingRegistry();
 
 
@@ -358,12 +358,20 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	/**
 	 * Look up a handler method for the given request.
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description  根据路径获取HandlerMethod
+	 * @Date 16:40 2019/9/25
+	 * @Param [request]
+	 * @return org.springframework.web.method.HandlerMethod
+	 **/
 	@Override
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		request.setAttribute(LOOKUP_PATH, lookupPath);
 		this.mappingRegistry.acquireReadLock();
 		try {
+			//***创建一个HandlerMethod***
 			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
 			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
 		}
@@ -529,17 +537,17 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * <p>Package-private for testing purposes.
 	 */
 	class MappingRegistry {
-
+        //***注册表1***
 		private final Map<T, MappingRegistration<T>> registry = new HashMap<>();
-
+        //***注册表2***
 		private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<>();
-
+        //***URL 映射***
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
-
+        //***Mapping名字 与 HandlerMethod映射***
 		private final Map<String, List<HandlerMethod>> nameLookup = new ConcurrentHashMap<>();
 
 		private final Map<HandlerMethod, CorsConfiguration> corsLookup = new ConcurrentHashMap<>();
-
+        //***读写锁***
 		private final ReentrantReadWriteLock readWriteLock = new ReentrantReadWriteLock();
 
 		/**

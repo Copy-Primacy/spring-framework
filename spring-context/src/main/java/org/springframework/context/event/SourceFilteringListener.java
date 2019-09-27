@@ -49,6 +49,15 @@ public class SourceFilteringListener implements GenericApplicationListener, Smar
 	 * @param delegate the delegate listener to invoke with event
 	 * from the specified source
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 实现将原始对象触发的事件，转发给指定的监听器
+	 * source -> 原始类
+	 * delegate -> 代理监听器
+	 * @Date 14:15 2019/9/18
+	 * @Param [source, delegate]
+	 * @return
+	 **/
 	public SourceFilteringListener(Object source, ApplicationListener<?> delegate) {
 		this.source = source;
 		this.delegate = (delegate instanceof GenericApplicationListener ?
@@ -66,7 +75,13 @@ public class SourceFilteringListener implements GenericApplicationListener, Smar
 		this.source = source;
 	}
 
-
+	/**
+	 * @Author MTSS
+	 * @Description 判断事件的来源，如果是原始类，则调用 onApplicationEventInternal()方法，将实践转发给delegate 监听器
+	 * @Date 14:19 2019/9/18
+	 * @Param [event]
+	 * @return void
+	 **/
 	@Override
 	public void onApplicationEvent(ApplicationEvent event) {
 		if (event.getSource() == this.source) {
@@ -101,6 +116,13 @@ public class SourceFilteringListener implements GenericApplicationListener, Smar
 	 * <p>The default implementation invokes the specified delegate, if any.
 	 * @param event the event to process (matching the specified source)
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 事件转发
+	 * @Date 14:22 2019/9/18
+	 * @Param [event]
+	 * @return void
+	 **/
 	protected void onApplicationEventInternal(ApplicationEvent event) {
 		if (this.delegate == null) {
 			throw new IllegalStateException(

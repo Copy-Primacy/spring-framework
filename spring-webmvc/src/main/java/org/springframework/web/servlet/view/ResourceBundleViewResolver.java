@@ -195,11 +195,19 @@ public class ResourceBundleViewResolver extends AbstractCachingViewResolver
 		}
 	}
 
-
+    /**
+     * @Author MTSS
+     * @Description 新建视图
+     * @Date 11:12 2019/9/25
+     * @Param [viewName, locale]
+     * @return org.springframework.web.servlet.View
+     **/
 	@Override
 	protected View loadView(String viewName, Locale locale) throws Exception {
+		//***根据Locale创建BeanFactory工厂***
 		BeanFactory factory = initFactory(locale);
 		try {
+			//***使用IOC方式创建视图***
 			return factory.getBean(viewName, View.class);
 		}
 		catch (NoSuchBeanDefinitionException ex) {

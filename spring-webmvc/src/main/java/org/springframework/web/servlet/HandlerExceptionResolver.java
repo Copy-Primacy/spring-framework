@@ -49,6 +49,13 @@ public interface HandlerExceptionResolver {
 	 * @return a corresponding {@code ModelAndView} to forward to,
 	 * or {@code null} for default processing in the resolution chain
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 解析异常，转换成对应的 ModelAndView
+	 * @Date 10:05 2019/9/19
+	 * @Param [request, response, handler, ex]
+	 * @return org.springframework.web.servlet.ModelAndView
+	 **/
 	@Nullable
 	ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex);

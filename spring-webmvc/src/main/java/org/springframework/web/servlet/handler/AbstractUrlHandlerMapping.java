@@ -120,9 +120,12 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Override
 	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
+		//***从请求中获取地址***
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		request.setAttribute(LOOKUP_PATH, lookupPath);
+		//***获取handler***
 		Object handler = lookupHandler(lookupPath, request);
+		//***没有handler怎么办？找默认的呀！***
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
@@ -162,13 +165,17 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	@Nullable
 	protected Object lookupHandler(String urlPath, HttpServletRequest request) throws Exception {
 		// Direct match?
+		//***使用Map存储各种handler，key：请求路径；value：handler对象***
 		Object handler = this.handlerMap.get(urlPath);
 		if (handler != null) {
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
+				//***获取的handler竟然是String类型***
 				String handlerName = (String) handler;
+				//***去Spring中找对应的Bean***
 				handler = obtainApplicationContext().getBean(handlerName);
 			}
+			//***合法校验***
 			validateHandler(handler, request);
 			return buildPathExposingHandler(handler, urlPath, urlPath, null);
 		}
@@ -256,10 +263,18 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @param uriTemplateVariables the URI template variables, can be {@code null} if no variables found
 	 * @return the final handler object
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 将handler转换成 HandlerExecutionChain
+	 * @Date 10:10 2019/9/26
+	 * @Param [rawHandler, bestMatchingPattern, pathWithinMapping, uriTemplateVariables]
+	 * @return java.lang.Object
+	 **/
 	protected Object buildPathExposingHandler(Object rawHandler, String bestMatchingPattern,
 			String pathWithinMapping, @Nullable Map<String, String> uriTemplateVariables) {
 
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
+		//***添加拦截器***
 		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
 		if (!CollectionUtils.isEmpty(uriTemplateVariables)) {
 			chain.addInterceptor(new UriTemplateVariablesHandlerInterceptor(uriTemplateVariables));

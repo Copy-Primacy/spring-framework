@@ -767,11 +767,19 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		return true;
 	}
 
+	/**
+	 * @Author MTSS
+	 * @Description HandlerAdapter -> 获取ModelAndView
+	 * @Date 10:12 2019/9/25
+	 * @Param [request, response, handlerMethod]
+	 * @return org.springframework.web.servlet.ModelAndView
+	 **/
 	@Override
 	protected ModelAndView handleInternal(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
 
 		ModelAndView mav;
+		//***非法校验***
 		checkRequest(request);
 
 		// Execute invokeHandlerMethod in synchronized block if required.
@@ -779,7 +787,9 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			HttpSession session = request.getSession(false);
 			if (session != null) {
 				Object mutex = WebUtils.getSessionMutex(session);
+				//***对创建视图的方法进行加锁***
 				synchronized (mutex) {
+					//***创建 ModelAndView***
 					mav = invokeHandlerMethod(request, response, handlerMethod);
 				}
 			}
@@ -841,6 +851,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * @since 4.2
 	 * @see #createInvocableHandlerMethod(HandlerMethod)
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 创建视图
+	 * @Date 10:16 2019/9/25
+	 * @Param [request, response, handlerMethod]
+	 * @return org.springframework.web.servlet.ModelAndView
+	 **/
 	@Nullable
 	protected ModelAndView invokeHandlerMethod(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
@@ -848,6 +865,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		ServletWebRequest webRequest = new ServletWebRequest(request, response);
 		try {
 			WebDataBinderFactory binderFactory = getDataBinderFactory(handlerMethod);
+			//***实例化ModelFactory工厂***
 			ModelFactory modelFactory = getModelFactory(handlerMethod, binderFactory);
 
 			ServletInvocableHandlerMethod invocableMethod = createInvocableHandlerMethod(handlerMethod);
@@ -859,7 +877,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			}
 			invocableMethod.setDataBinderFactory(binderFactory);
 			invocableMethod.setParameterNameDiscoverer(this.parameterNameDiscoverer);
-
+            //***实例化ModelAndViewContainer容器***
 			ModelAndViewContainer mavContainer = new ModelAndViewContainer();
 			mavContainer.addAllAttributes(RequestContextUtils.getInputFlashMap(request));
 			modelFactory.initModel(webRequest, mavContainer, invocableMethod);
@@ -889,7 +907,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			if (asyncManager.isConcurrentHandlingStarted()) {
 				return null;
 			}
-
+            //***真正创建视图的方法***
 			return getModelAndView(mavContainer, modelFactory, webRequest);
 		}
 		finally {
@@ -989,7 +1007,13 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 
 		return new ServletRequestDataBinderFactory(binderMethods, getWebBindingInitializer());
 	}
-
+    /***
+     * @Author MTSS
+     * @Description 创建视图
+     * @Date 10:19 2019/9/25
+     * @Param [mavContainer, modelFactory, webRequest]
+     * @return org.springframework.web.servlet.ModelAndView
+     **/
 	@Nullable
 	private ModelAndView getModelAndView(ModelAndViewContainer mavContainer,
 			ModelFactory modelFactory, NativeWebRequest webRequest) throws Exception {
@@ -998,15 +1022,20 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 		if (mavContainer.isRequestHandled()) {
 			return null;
 		}
+		//***创建ModelMap，用来存储数据***
 		ModelMap model = mavContainer.getModel();
+		//创建ModelAndView，设置视图 名称，数据，状态
 		ModelAndView mav = new ModelAndView(mavContainer.getViewName(), model, mavContainer.getStatus());
 		if (!mavContainer.isViewReference()) {
+			//***设置视图对象***
 			mav.setView((View) mavContainer.getView());
 		}
 		if (model instanceof RedirectAttributes) {
+			//***创建flashAttributes，用来临时存储数据，用于跳转使用***
 			Map<String, ?> flashAttributes = ((RedirectAttributes) model).getFlashAttributes();
 			HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 			if (request != null) {
+				//***将临时数据存储到RequestContext域当中***
 				RequestContextUtils.getOutputFlashMap(request).putAll(flashAttributes);
 			}
 		}
