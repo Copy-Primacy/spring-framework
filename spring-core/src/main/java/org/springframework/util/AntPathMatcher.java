@@ -213,8 +213,9 @@ public class AntPathMatcher implements PathMatcher {
 		if (path == null || path.startsWith(this.pathSeparator) != pattern.startsWith(this.pathSeparator)) {
 			return false;
 		}
-
+        //将url分割成数组
 		String[] pattDirs = tokenizePattern(pattern);
+		//和完整路径进行校验
 		if (fullMatch && this.caseSensitive && !isPotentialMatch(path, pattDirs)) {
 			return false;
 		}

@@ -86,7 +86,7 @@ public abstract class AbstractDispatcherServletInitializer extends AbstractConte
 	 */
 	/**
 	 * @Author MTSS
-	 * @Description 创建DispatcherServlet的核心代码
+	 * @Description 手动注册Servlet和Filter
 	 * @Date 17:46 2019/9/18
 	 * @Param [servletContext]
 	 * @return void

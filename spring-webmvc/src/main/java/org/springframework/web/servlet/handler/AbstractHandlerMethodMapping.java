@@ -202,6 +202,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	@Override
 	public void afterPropertiesSet() {
+		//Map的初始化
 		initHandlerMethods();
 	}
 
@@ -211,12 +212,22 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #processCandidateBean
 	 * @see #handlerMethodsInitialized
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 初始化处理器方法
+	 * @Date 14:30 2019/9/29
+	 * @Param []
+	 * @return void
+	 **/
 	protected void initHandlerMethods() {
+		//***从容器中获取注册的Bean***
 		for (String beanName : getCandidateBeanNames()) {
 			if (!beanName.startsWith(SCOPED_TARGET_NAME_PREFIX)) {
+				//***处理 Bean***
 				processCandidateBean(beanName);
 			}
 		}
+		//***初始化处理器的方法们。目前是空方法，暂无具体的实现***
 		handlerMethodsInitialized(getHandlerMethods());
 	}
 
@@ -244,6 +255,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #detectHandlerMethods
 	 */
 	protected void processCandidateBean(String beanName) {
+		//***获得 Bean 对应的类型***
 		Class<?> beanType = null;
 		try {
 			beanType = obtainApplicationContext().getType(beanName);
@@ -254,7 +266,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				logger.trace("Could not resolve type for bean '" + beanName + "'", ex);
 			}
 		}
+		//isHandler是一个模板方法，主要的作用是检查方法的类是否存在@Controller和@RequestMapping
 		if (beanType != null && isHandler(beanType)) {
+			//***保存Handler到Map里***
 			detectHandlerMethods(beanName);
 		}
 	}
@@ -264,12 +278,22 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param handler either a bean name or an actual handler instance
 	 * @see #getMappingForMethod
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 扫描处理方法
+	 * @Date 14:32 2019/9/29
+	 * @Param [handler]
+	 * @return void
+	 **/
 	protected void detectHandlerMethods(Object handler) {
+		//***获得handler的类型***
 		Class<?> handlerType = (handler instanceof String ?
 				obtainApplicationContext().getType((String) handler) : handler.getClass());
 
 		if (handlerType != null) {
+			//***获得真实的类。因为，handlerType 可能是代理类***
 			Class<?> userType = ClassUtils.getUserClass(handlerType);
+			//***获得匹配的方法的集合***
 			Map<Method, T> methods = MethodIntrospector.selectMethods(userType,
 					(MethodIntrospector.MetadataLookup<T>) method -> {
 						try {
@@ -283,8 +307,10 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			if (logger.isTraceEnabled()) {
 				logger.trace(formatMappings(userType, methods));
 			}
+			//***遍历方法，逐个注册 HandlerMethod***
 			methods.forEach((method, mapping) -> {
 				Method invocableMethod = AopUtils.selectInvocableMethod(method, userType);
+				//将符合要求的method注册到Map中
 				registerHandlerMethod(handler, invocableMethod, mapping);
 			});
 		}
@@ -315,6 +341,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * under the same mapping
 	 */
 	protected void registerHandlerMethod(Object handler, Method method, T mapping) {
+		//注册HandlerMethod
 		this.mappingRegistry.register(mapping, handler, method);
 	}
 
@@ -324,11 +351,20 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @param method the target method
 	 * @return the created HandlerMethod
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 创建 HandlerMethod
+	 * @Date 9:24 2019/9/29
+	 * @Param [handler, method]
+	 * @return org.springframework.web.method.HandlerMethod
+	 **/
 	protected HandlerMethod createHandlerMethod(Object handler, Method method) {
+		//***如果 handler 的类型为String，则表明此handler为一个Bean 对象***
 		if (handler instanceof String) {
 			return new HandlerMethod((String) handler,
 					obtainApplicationContext().getAutowireCapableBeanFactory(), method);
 		}
+		//***如果handler是非String类型，则表明这已经是一个handler对象，即HandlerMethod是一个handler + method***
 		return new HandlerMethod(handler, method);
 	}
 
@@ -360,22 +396,26 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 */
 	/**
 	 * @Author MTSS
-	 * @Description  根据路径获取HandlerMethod
+	 * @Description  处理Method的handler
 	 * @Date 16:40 2019/9/25
 	 * @Param [request]
 	 * @return org.springframework.web.method.HandlerMethod
 	 **/
 	@Override
 	protected HandlerMethod getHandlerInternal(HttpServletRequest request) throws Exception {
+		//***获得请求的路径***
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		request.setAttribute(LOOKUP_PATH, lookupPath);
+		//***获得写锁***
 		this.mappingRegistry.acquireReadLock();
 		try {
-			//***创建一个HandlerMethod***
+			//***获得 HandlerMethod 对象***
 			HandlerMethod handlerMethod = lookupHandlerMethod(lookupPath, request);
+			//***进一步，获得 HandlerMethod 对象***
 			return (handlerMethod != null ? handlerMethod.createWithResolvedBean() : null);
 		}
 		finally {
+			//***释放写锁***
 			this.mappingRegistry.releaseReadLock();
 		}
 	}
@@ -389,18 +429,28 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * @see #handleMatch(Object, String, HttpServletRequest)
 	 * @see #handleNoMatch(Set, String, HttpServletRequest)
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 获得 HandlerMethod 对象
+	 * @Date 11:58 2019/9/29
+	 * @Param [lookupPath, request]
+	 * @return org.springframework.web.method.HandlerMethod
+	 **/
 	@Nullable
 	protected HandlerMethod lookupHandlerMethod(String lookupPath, HttpServletRequest request) throws Exception {
+		//***Match 数组，存储匹配上当前请求的结果***
 		List<Match> matches = new ArrayList<>();
+		//***优先，基于直接 URL 的 Mapping 们，进行匹配***
 		List<T> directPathMatches = this.mappingRegistry.getMappingsByUrl(lookupPath);
 		if (directPathMatches != null) {
 			addMatchingMappings(directPathMatches, matches, request);
 		}
+		//***其次，扫描注册表的 Mapping 们，进行匹配***
 		if (matches.isEmpty()) {
 			// No choice but to go through all mappings...
 			addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, request);
 		}
-
+        //***如果匹配到，则获取最佳匹配的 Match 对象的 handlerMethod 属性***
 		if (!matches.isEmpty()) {
 			Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
 			matches.sort(comparator);
@@ -536,12 +586,19 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	 * to perform lookups and providing concurrent access.
 	 * <p>Package-private for testing purposes.
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description T代表着匹配条件【模式】（也就是RequestCondition）
+	 * @Date 14:06 2019/9/29
+	 * @Param
+	 * @return
+	 **/
 	class MappingRegistry {
         //***注册表1***
 		private final Map<T, MappingRegistration<T>> registry = new HashMap<>();
-        //***注册表2***
+        //***一个匹配模式对应一个handler方法***
 		private final Map<T, HandlerMethod> mappingLookup = new LinkedHashMap<>();
-        //***URL 映射***
+        //***URL 映射，一个url接口可以对应多个匹配模式***
 		private final MultiValueMap<String, T> urlLookup = new LinkedMultiValueMap<>();
         //***Mapping名字 与 HandlerMethod映射***
 		private final Map<String, List<HandlerMethod>> nameLookup = new ConcurrentHashMap<>();
@@ -586,6 +643,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		/**
 		 * Acquire the read lock when using getMappings and getMappingsByUrl.
 		 */
+		/**
+		 * @Author MTSS
+		 * @Description 获取读锁
+		 * @Date 14:57 2019/9/27
+		 * @Param []
+		 * @return void
+		 **/
 		public void acquireReadLock() {
 			this.readWriteLock.readLock().lock();
 		}
@@ -593,29 +657,50 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		/**
 		 * Release the read lock after using getMappings and getMappingsByUrl.
 		 */
+		/**
+		 * @Author MTSS
+		 * @Description 释放读锁
+		 * @Date 14:58 2019/9/27
+		 * @Param []
+		 * @return void
+		 **/
 		public void releaseReadLock() {
 			this.readWriteLock.readLock().unlock();
 		}
 
+		/**
+		 * @Author MTSS
+		 * @Description 注册，获取Mapping
+		 * @Date 14:58 2019/9/27
+		 * @Param [mapping, handler, method]
+		 * @return void
+		 **/
 		public void register(T mapping, Object handler, Method method) {
 			// Assert that the handler method is not a suspending one.
 			if (KotlinDetector.isKotlinType(method.getDeclaringClass()) && KotlinDelegate.isSuspend(method)) {
 				throw new IllegalStateException("Unsupported suspending handler method detected: " + method);
 			}
+			//***获取写锁***
 			this.readWriteLock.writeLock().lock();
 			try {
+				//***创建 HandlerMethod 对象***
 				HandlerMethod handlerMethod = createHandlerMethod(handler, method);
+				//***校验当前 mapping 不存在，否则抛出 IllegalStateException 异常***
 				validateMethodMapping(handlerMethod, mapping);
-				this.mappingLookup.put(mapping, handlerMethod);
-
-				List<String> directUrls = getDirectUrls(mapping);
-				for (String url : directUrls) {
-					this.urlLookup.add(url, mapping);
-				}
-
+				//***添加 mapping + HandlerMethod 到 mappingLookup 中***
+				 this.mappingLookup.put(mapping, handlerMethod);
+				 //***获得 mapping 对应的普通 URL 数组***
+				 List<String> directUrls = getDirectUrls(mapping);
+				 //***添加到 url + mapping 到 urlLookup 集合中***
+				 for (String url : directUrls) {
+				 this.urlLookup.add(url, mapping);
+				 }
+                //***初始化 nameLookup***
 				String name = null;
 				if (getNamingStrategy() != null) {
+					//***获得 Mapping 的名字***
 					name = getNamingStrategy().getName(handlerMethod, mapping);
+					//***添加到 mapping 的名字 + HandlerMethod 到 nameLookup 中***
 					addMappingName(name, handlerMethod);
 				}
 
@@ -623,14 +708,21 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 				if (corsConfig != null) {
 					this.corsLookup.put(handlerMethod, corsConfig);
 				}
-
+                //***mapping + handlerMethod + directUrls + name -> registry***
 				this.registry.put(mapping, new MappingRegistration<>(mapping, handlerMethod, directUrls, name));
 			}
 			finally {
+				//***释放写锁***
 				this.readWriteLock.writeLock().unlock();
 			}
 		}
-
+        /**
+         * @Author MTSS
+         * @Description 校验当前的 Mapping 是否存在
+         * @Date 8:37 2019/9/29
+         * @Param [handlerMethod, mapping]
+         * @return void
+         **/
 		private void validateMethodMapping(HandlerMethod handlerMethod, T mapping) {
 			// Assert that the supplied mapping is unique.
 			HandlerMethod existingHandlerMethod = this.mappingLookup.get(mapping);
@@ -641,45 +733,68 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 						existingHandlerMethod.getBean() + "' bean method\n" + existingHandlerMethod + " mapped.");
 			}
 		}
-
+        /**
+         * @Author MTSS
+         * @Description 获得 mapping 对应的直接 URL 数组
+         * @Date 15:23 2019/9/27
+         * @Param [mapping]
+         * @return java.util.List<java.lang.String>
+         **/ 
 		private List<String> getDirectUrls(T mapping) {
 			List<String> urls = new ArrayList<>(1);
+			//***遍历 Mapping 对应的路径***
 			for (String path : getMappingPathPatterns(mapping)) {
+				//***非**模式**路径***
 				if (!getPathMatcher().isPattern(path)) {
 					urls.add(path);
 				}
 			}
 			return urls;
 		}
-
+        /**
+         * @Author MTSS
+         * @Description 添加 mapping 的名字 + HandlerMethod 到 nameLookup 中
+         * @Date 8:42 2019/9/29
+         * @Param [name, handlerMethod]
+         * @return void
+         **/
 		private void addMappingName(String name, HandlerMethod handlerMethod) {
+			//*** 获得 Mapping 的名字，对应的 HandlerMethod 数组***
 			List<HandlerMethod> oldList = this.nameLookup.get(name);
 			if (oldList == null) {
 				oldList = Collections.emptyList();
 			}
-
+            //***如果已经存在，则不用添加***
 			for (HandlerMethod current : oldList) {
 				if (handlerMethod.equals(current)) {
 					return;
 				}
 			}
-
+            //***添加到 nameLookup 中，重新创建的原因是，保证数组的大小固定。因为，基本不太存在扩容的可能性，申请大了就浪费了***
 			List<HandlerMethod> newList = new ArrayList<>(oldList.size() + 1);
 			newList.addAll(oldList);
 			newList.add(handlerMethod);
 			this.nameLookup.put(name, newList);
 		}
-
+        /**
+         * @Author MTSS
+         * @Description 取消注册
+         * @Date 8:47 2019/9/29
+         * @Param [mapping]
+         * @return void
+         **/
 		public void unregister(T mapping) {
+			//***获得写锁***
 			this.readWriteLock.writeLock().lock();
 			try {
+				//***从 registry 中移除***
 				MappingRegistration<T> definition = this.registry.remove(mapping);
 				if (definition == null) {
 					return;
 				}
-
+                //***从 mappingLookup 中移除***
 				this.mappingLookup.remove(definition.getMapping());
-
+                //***从 urlLookup 移除***
 				for (String url : definition.getDirectUrls()) {
 					List<T> list = this.urlLookup.get(url);
 					if (list != null) {
@@ -689,12 +804,13 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 						}
 					}
 				}
-
+                //***从 nameLookup 移除***
 				removeMappingName(definition);
-
+                //***从 corsLookup 中移除***
 				this.corsLookup.remove(definition.getHandlerMethod());
 			}
 			finally {
+				//***释放写锁***
 				this.readWriteLock.writeLock().unlock();
 			}
 		}
@@ -723,15 +839,23 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
-
+    /**
+     * @Author MTSS
+     * @Description 注册类
+     * @Date 16:06 2019/9/29
+     * @Param
+     * @return
+     **/
 	private static class MappingRegistration<T> {
-
+        //***Mapping 对象***
 		private final T mapping;
-
+        //***HandlerMethod 对象***
 		private final HandlerMethod handlerMethod;
-
+        //***直接 URL 数组***
 		private final List<String> directUrls;
-
+		/**
+		 * {@link #mapping} 的名字
+		 */
 		@Nullable
 		private final String mappingName;
 
@@ -744,7 +868,7 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 			this.handlerMethod = handlerMethod;
 			this.directUrls = (directUrls != null ? directUrls : Collections.emptyList());
 			this.mappingName = mappingName;
-		}
+	}
 
 		public T getMapping() {
 			return this.mapping;

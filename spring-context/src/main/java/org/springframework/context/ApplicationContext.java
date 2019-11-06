@@ -55,6 +55,13 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.beans.factory.BeanFactory
  * @see org.springframework.core.io.ResourceLoader
  */
+/**
+ * @Author MTSS
+ * @Description 相当于Spring的身躯
+ * @Date 8:55 2019/11/1
+ * @Param
+ * @return
+ **/
 public interface ApplicationContext extends EnvironmentCapable, ListableBeanFactory, HierarchicalBeanFactory,
 		MessageSource, ApplicationEventPublisher, ResourcePatternResolver {
 

@@ -176,7 +176,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 	public final void init() throws ServletException {
 
 		// Set bean properties from init parameters.
-		//***解析<init-param />标签，封装到propertyValues pvs 中***
+		//***解析<init-param />标签并构建一个PropertyValues***
 		PropertyValues pvs = new ServletConfigPropertyValues(getServletConfig(), this.requiredProperties);
 		if (!pvs.isEmpty()) {
 			try {
@@ -187,7 +187,7 @@ public abstract class HttpServletBean extends HttpServlet implements Environment
 				bw.registerCustomEditor(Resource.class, new ResourceEditor(resourceLoader, getEnvironment()));
 				//***空实现，留给子类覆盖***
 				initBeanWrapper(bw);
-				//***以Sring的方式将pvs注入到BeanWrapper***
+				//***以Sring的方式向PropertyValues中设置值***
 				bw.setPropertyValues(pvs, true);
 			}
 			catch (BeansException ex) {

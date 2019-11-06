@@ -61,6 +61,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 
 	private boolean lazyInitHandlers = false;
 
+	//handlerMap的初始化（urlPath的提供）是由子类完成的，具体模板方法是registerHandler（注册功能）
 	private final Map<String, Object> handlerMap = new LinkedHashMap<>();
 
 
@@ -117,32 +118,44 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 	 * @param request current HTTP request
 	 * @return the handler instance, or {@code null} if none found
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description url -> handler
+	 * @Date 15:10 2019/10/30
+	 * @Param [request]
+	 * @return java.lang.Object
+	 **/
 	@Override
 	@Nullable
 	protected Object getHandlerInternal(HttpServletRequest request) throws Exception {
-		//***从请求中获取地址***
+		//***获取请求接口路径***
 		String lookupPath = getUrlPathHelper().getLookupPathForRequest(request);
 		request.setAttribute(LOOKUP_PATH, lookupPath);
 		//***获取handler***
 		Object handler = lookupHandler(lookupPath, request);
-		//***没有handler怎么办？找默认的呀！***
+		//***没有从url中获取到handler怎么办？***
 		if (handler == null) {
 			// We need to care for the default handler directly, since we need to
 			// expose the PATH_WITHIN_HANDLER_MAPPING_ATTRIBUTE for it as well.
 			Object rawHandler = null;
 			if ("/".equals(lookupPath)) {
+				//如果访问的接口url是根路径，使用rootHandler
 				rawHandler = getRootHandler();
 			}
 			if (rawHandler == null) {
+				//如果也不是根路径，使用defaultHandler
 				rawHandler = getDefaultHandler();
 			}
 			if (rawHandler != null) {
 				// Bean name or resolved handler?
 				if (rawHandler instanceof String) {
 					String handlerName = (String) rawHandler;
+					//同之前的，去SpringMVC中找相应注册的Bean对象
 					rawHandler = obtainApplicationContext().getBean(handlerName);
 				}
+				//安全校验
 				validateHandler(rawHandler, request);
+				//其实这里返回的handler是经过HandlerExecutionChain包装的，并且添加了对应的拦截器
 				handler = buildPathExposingHandler(rawHandler, lookupPath, lookupPath, null);
 			}
 		}
@@ -170,9 +183,8 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		if (handler != null) {
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
-				//***获取的handler竟然是String类型***
 				String handlerName = (String) handler;
-				//***去Spring中找对应的Bean***
+				//***获取的handler如果是String类型，则表明handler是注册到SpringMVC当中，需要根据名称获取到真正的handler***
 				handler = obtainApplicationContext().getBean(handlerName);
 			}
 			//***合法校验***
@@ -181,6 +193,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		}
 
 		// Pattern match?
+		//解决模式匹配的情况：比如使用Restful风格，需要处理路径中的参数
 		List<String> matchingPatterns = new ArrayList<>();
 		for (String registeredPattern : this.handlerMap.keySet()) {
 			if (getPathMatcher().match(registeredPattern, urlPath)) {
@@ -200,12 +213,14 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			if (logger.isTraceEnabled() && matchingPatterns.size() > 1) {
 				logger.trace("Matching patterns " + matchingPatterns);
 			}
+			//取排序后的第一个匹配模式
 			bestMatch = matchingPatterns.get(0);
 		}
 		if (bestMatch != null) {
 			handler = this.handlerMap.get(bestMatch);
 			if (handler == null) {
 				if (bestMatch.endsWith("/")) {
+					//接口中最后的/都会被去掉
 					handler = this.handlerMap.get(bestMatch.substring(0, bestMatch.length() - 1));
 				}
 				if (handler == null) {
@@ -216,13 +231,16 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			// Bean name or resolved handler?
 			if (handler instanceof String) {
 				String handlerName = (String) handler;
+				//同上，从SpringMVC容器中获取注册的Bean对象
 				handler = obtainApplicationContext().getBean(handlerName);
 			}
+			//安全校验
 			validateHandler(handler, request);
 			String pathWithinMapping = getPathMatcher().extractPathWithinPattern(bestMatch, urlPath);
 
 			// There might be multiple 'best patterns', let's make sure we have the correct URI template variables
 			// for all of them
+			//解决多个匹配模式顺序相同，sort返回都是0的情况
 			Map<String, String> uriTemplateVariables = new LinkedHashMap<>();
 			for (String matchingPattern : matchingPatterns) {
 				if (patternComparator.compare(bestMatch, matchingPattern) == 0) {
@@ -274,7 +292,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			String pathWithinMapping, @Nullable Map<String, String> uriTemplateVariables) {
 
 		HandlerExecutionChain chain = new HandlerExecutionChain(rawHandler);
-		//***添加拦截器***
+		//***添加拦截器，将与当前url实际匹配的Pattern，匹配条件和url模板参数等设置到request中，方便之后使用***
 		chain.addInterceptor(new PathExposingHandlerInterceptor(bestMatchingPattern, pathWithinMapping));
 		if (!CollectionUtils.isEmpty(uriTemplateVariables)) {
 			chain.addInterceptor(new UriTemplateVariablesHandlerInterceptor(uriTemplateVariables));
@@ -348,6 +366,7 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 		Object resolvedHandler = handler;
 
 		// Eagerly resolve handler if referencing singleton via name.
+		//获取最新要注册的handler
 		if (!this.lazyInitHandlers && handler instanceof String) {
 			String handlerName = (String) handler;
 			ApplicationContext applicationContext = obtainApplicationContext();
@@ -355,9 +374,10 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 				resolvedHandler = applicationContext.getBean(handlerName);
 			}
 		}
-
+        //根据urlPath获取原来存在的handler
 		Object mappedHandler = this.handlerMap.get(urlPath);
 		if (mappedHandler != null) {
+			//判断将要注册的handler和原来存在的handler是否是同一个，以为一个url只能对应一个handler
 			if (mappedHandler != resolvedHandler) {
 				throw new IllegalStateException(
 						"Cannot map " + getHandlerDescription(handler) + " to URL path [" + urlPath +
@@ -365,19 +385,23 @@ public abstract class AbstractUrlHandlerMapping extends AbstractHandlerMapping i
 			}
 		}
 		else {
+			//url是/或者/*的还需保存一下
 			if (urlPath.equals("/")) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Root mapping to " + getHandlerDescription(handler));
 				}
+				//url是/
 				setRootHandler(resolvedHandler);
 			}
 			else if (urlPath.equals("/*")) {
 				if (logger.isTraceEnabled()) {
 					logger.trace("Default mapping to " + getHandlerDescription(handler));
 				}
+				//url是/*
 				setDefaultHandler(resolvedHandler);
 			}
 			else {
+				//注册handler
 				this.handlerMap.put(urlPath, resolvedHandler);
 				if (logger.isTraceEnabled()) {
 					logger.trace("Mapped [" + urlPath + "] onto " + getHandlerDescription(handler));

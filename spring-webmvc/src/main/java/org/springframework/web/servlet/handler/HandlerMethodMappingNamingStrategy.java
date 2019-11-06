@@ -47,6 +47,13 @@ public interface HandlerMethodMappingNamingStrategy<T> {
 	 * @param mapping the mapping
 	 * @return the name
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 获取mapping的名字
+	 * @Date 14:01 2019/9/29
+	 * @Param [handlerMethod, mapping]
+	 * @return java.lang.String
+	 **/
 	String getName(HandlerMethod handlerMethod, T mapping);
 
 }

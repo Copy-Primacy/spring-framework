@@ -891,7 +891,15 @@ public abstract class ClassUtils {
 	 * @param clazz the class to check
 	 * @return the user-defined class
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 获取真正的类，可能是代理
+	 * @Date 14:33 2019/9/29
+	 * @Param [clazz]
+	 * @return java.lang.Class<?>
+	 **/
 	public static Class<?> getUserClass(Class<?> clazz) {
+		//***如果 CG_CLASS 代理类，则获取其父类***
 		if (clazz.getName().contains(CGLIB_CLASS_SEPARATOR)) {
 			Class<?> superclass = clazz.getSuperclass();
 			if (superclass != null && superclass != Object.class) {

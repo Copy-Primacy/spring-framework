@@ -565,7 +565,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		long startTime = System.currentTimeMillis();
 
 		try {
-			//***真正的调用方法***
+			//创建Servlet WebApplicationContext容器
 			this.webApplicationContext = initWebApplicationContext();
 			//***空实现，如有需要，子类可以实现该方法，实现自定义逻辑***
 			initFrameworkServlet();
@@ -630,13 +630,16 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 			// has been registered in the servlet context. If one exists, it is assumed
 			// that the parent context (if any) has already been set and that the
 			// user has performed any initialization such as setting the context id
+			//去web.xml配置文件中找名字，然后根据名字去ServletContext寻找
 			wac = findWebApplicationContext();
 		}
 		//***情况三：创建一个WebApplicationContext对象***
 		if (wac == null) {
 			// No context instance is defined for this servlet -> create a local one
+			//实在没有，那就只能自己创建了
 			wac = createWebApplicationContext(rootContext);
 		}
+		//判断是否已经刷新过
 		if (!this.refreshEventReceived) {
 			// Either the context is not a ConfigurableApplicationContext with refresh
 			// support or the context injected at construction time had already been
@@ -650,7 +653,7 @@ public abstract class FrameworkServlet extends HttpServletBean implements Applic
 		if (this.publishContext) {
 			// Publish the context as a servlet context attribute.
 			String attrName = getServletContextAttributeName();
-			//***将context 设置到 ServletContext中***
+			//***将新创建的容器设置到 ServletContext中***
 			getServletContext().setAttribute(attrName, wac);
 		}
 

@@ -553,12 +553,21 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	}
 
 
+	/**
+	 * @Author MTSS
+	 * @Description 初始化操作
+	 * @Date 14:03 2019/10/31
+	 * @Param []
+	 * @return void
+	 **/
 	@Override
 	public void afterPropertiesSet() {
 		// Do this first, it may add ResponseBody advice beans
 		initControllerAdviceCache();
 
+		//使用了责任链模式，初始化剩余的3个组件
 		if (this.argumentResolvers == null) {
+			//添加默认的组件解析器（注释，类型，自定义，万能），解析顺序按照添加的顺序依次执行，直到遇到能解析的为止
 			List<HandlerMethodArgumentResolver> resolvers = getDefaultArgumentResolvers();
 			this.argumentResolvers = new HandlerMethodArgumentResolverComposite().addResolvers(resolvers);
 		}
@@ -571,14 +580,20 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			this.returnValueHandlers = new HandlerMethodReturnValueHandlerComposite().addHandlers(handlers);
 		}
 	}
-
+    /**
+     * @Author MTSS
+     * @Description 初始化@ControllerAdvice中的3个属性
+     * @Date 14:50 2019/10/31
+     * @Param []
+     * @return void
+     **/
 	private void initControllerAdviceCache() {
 		if (getApplicationContext() == null) {
 			return;
 		}
-
+        //从容器中拿到所有注册了@ControllerAdviceBean的bean
 		List<ControllerAdviceBean> adviceBeans = ControllerAdviceBean.findAnnotatedBeans(getApplicationContext());
-
+        //定义一个临时的requestResponseBodyAdviceBeans
 		List<Object> requestResponseBodyAdviceBeans = new ArrayList<>();
 
 		for (ControllerAdviceBean adviceBean : adviceBeans) {
@@ -586,19 +601,22 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 			if (beanType == null) {
 				throw new IllegalStateException("Unresolvable type for ControllerAdviceBean: " + adviceBean);
 			}
+			//过滤出所有的@ModelAttribute，完成modelAttributeAdviceCache初始化
 			Set<Method> attrMethods = MethodIntrospector.selectMethods(beanType, MODEL_ATTRIBUTE_METHODS);
 			if (!attrMethods.isEmpty()) {
 				this.modelAttributeAdviceCache.put(adviceBean, attrMethods);
 			}
+			//过滤出所有的@InitBinder，完成initBinderAdviceCache初始化
 			Set<Method> binderMethods = MethodIntrospector.selectMethods(beanType, INIT_BINDER_METHODS);
 			if (!binderMethods.isEmpty()) {
 				this.initBinderAdviceCache.put(adviceBean, binderMethods);
 			}
+			//requestResponseBodyAdviceBeans初始化
 			if (RequestBodyAdvice.class.isAssignableFrom(beanType) || ResponseBodyAdvice.class.isAssignableFrom(beanType)) {
 				requestResponseBodyAdviceBeans.add(adviceBean);
 			}
 		}
-
+        //将临时变量添加到requestResponseBodyAdvice，这样做的目的是将筛选出的requestResponseBodyAdviceBeans放到列表的的最前边（此种注册方式的优先级更高）
 		if (!requestResponseBodyAdviceBeans.isEmpty()) {
 			this.requestResponseBodyAdvice.addAll(0, requestResponseBodyAdviceBeans);
 		}
@@ -774,6 +792,15 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 	 * @Param [request, response, handlerMethod]
 	 * @return org.springframework.web.servlet.ModelAndView
 	 **/
+	/**
+	 * @Author MTSS
+	 * @Description 使用handler处理请求
+	 * 1.HandlerMethod中封装了可执行的method方法
+	 * 2.通过反射，并从request获取参数，执行方法
+	 * @Date 10:32 2019/10/31
+	 * @Param [request, response, handlerMethod]
+	 * @return org.springframework.web.servlet.ModelAndView
+	 **/
 	@Override
 	protected ModelAndView handleInternal(HttpServletRequest request,
 			HttpServletResponse response, HandlerMethod handlerMethod) throws Exception {
@@ -789,7 +816,7 @@ public class RequestMappingHandlerAdapter extends AbstractHandlerMethodAdapter
 				Object mutex = WebUtils.getSessionMutex(session);
 				//***对创建视图的方法进行加锁***
 				synchronized (mutex) {
-					//***创建 ModelAndView***
+					//执行handler，返回ModelAndView
 					mav = invokeHandlerMethod(request, response, handlerMethod);
 				}
 			}

@@ -56,6 +56,13 @@ public abstract class AbstractContextLoaderInitializer implements WebApplication
 	 * from the {@link #createRootApplicationContext()} template method.
 	 * @param servletContext the servlet context to register the listener against
 	 */
+	/**
+	 * @Author MTSS
+	 * @Description 手动注册Listener
+	 * @Date 8:38 2019/11/4
+	 * @Param [servletContext]
+	 * @return void
+	 **/
 	protected void registerContextLoaderListener(ServletContext servletContext) {
 		WebApplicationContext rootAppContext = createRootApplicationContext();
 		if (rootAppContext != null) {

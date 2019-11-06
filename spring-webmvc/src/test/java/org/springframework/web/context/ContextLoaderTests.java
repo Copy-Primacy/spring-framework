@@ -79,22 +79,25 @@ public class ContextLoaderTests {
 	 **/
 	@Test
 	public void testContextLoaderListenerWithDefaultContext() {
-		//***MockServletContext用来初始化WebApplicationContext容器配置***
+		//模拟一个ServletContext
 		MockServletContext sc = new MockServletContext("");
-		//***将配置文件地址储存到MockServletContext里的Map中***
+		//向ServletContext中添加contextConfigLocation（默认加载的xml文件）
 		sc.addInitParameter(ContextLoader.CONFIG_LOCATION_PARAM,
 				"/org/springframework/web/context/WEB-INF/applicationContext.xml " +
 				"/org/springframework/web/context/WEB-INF/context-addition.xml");
-		//***ContextLoaderListener是用来真正创建Root WebApplicationContext***
+		//使用ContextLoaderListener来创建ROOT WebApplicationContext容器
 		ServletContextListener listener = new ContextLoaderListener();
-		//***创建容器的环境，可获取到Servlet的上下文***
+		//将ServletContext注册到ServletContextEvent（为什么要有这一步呢？直接使用ServletContext不好吗？）
+		//（ServletContextEvent会在Servlet容器启动或者终止的时候触发事件，到时候可能需要用到ServletContext）
 		ServletContextEvent event = new ServletContextEvent(sc);
 		//***初始化 Root WebApplicationContext 容器操作***
+		//【器用分析法】
 		listener.contextInitialized(event);
+		//Root WebApplicationContext容器的名字：org.springframework.web.context.WebApplicationContext.ROOT
 		String contextAttr = WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE;
-		//***获取新创建的Root 容器***
+		//根据名字获取新创建的Root容器
 		WebApplicationContext context = (WebApplicationContext) sc.getAttribute(contextAttr);
-		//***各种校验***
+		//判断新创建的Root容器是否是XmlWebApplicationContext类型
 		boolean condition1 = context instanceof XmlWebApplicationContext;
 		assertThat(condition1).as("Correct WebApplicationContext exposed in ServletContext").isTrue();
 		assertThat(WebApplicationContextUtils.getRequiredWebApplicationContext(sc) instanceof XmlWebApplicationContext).isTrue();

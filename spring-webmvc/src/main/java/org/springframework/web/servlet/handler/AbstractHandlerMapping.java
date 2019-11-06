@@ -84,7 +84,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	//***配置的拦截器组***
 	private final List<Object> interceptors = new ArrayList<>();
 
-	//***初始化后的拦截器组***
+	//***interceptors + Spring容器扫描的拦截器组***
 	private final List<HandlerInterceptor> adaptedInterceptors = new ArrayList<>();
 
 	@Nullable
@@ -205,7 +205,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	/**
 	 * @Author MTSS
-	 * @Description 可以通过该种方式设置拦截器组
+	 * @Description 可以通过该种方式初始化interceptors
 	 * @Date 16:05 2019/9/25
 	 * @Param [interceptors]
 	 * @return void
@@ -295,16 +295,16 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 */
 	/**
 	 * @Author MTSS
-	 * @Description 初始化拦截器
+	 * @Description 初始化adaptedInterceptors
 	 * @Date 16:08 2019/9/25
 	 * @Param []
 	 * @return void
 	 **/
 	@Override
 	protected void initApplicationContext() throws BeansException {
-		//***注册自定义的拦截器到 interceptor 中***
+		//***【模板方法】，用于给子类提供一个添加或者修改Interceptors的入口***
 		extendInterceptors(this.interceptors);
-		//***扫描已注册的 MappedInterceptor 的 bean们到 mappedInterceptors 中***
+		//***将SpringMVC及父容器中的所有MappedInterceptor类型的Bean添加到mappedInterceptors中***
 		detectMappedInterceptors(this.adaptedInterceptors);
 		//***将 interceptors初始化成 HandlerInterceptor并添加到 mappedInterceptors 中***
 		initInterceptors();
@@ -444,7 +444,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
-		//***根据请求获取handler***
+		//***寻找handler***
 		Object handler = getHandlerInternal(request);
 		if (handler == null) {
 			//***设置默认handler***
@@ -459,7 +459,7 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			//***handler是String类型怎么办？去Spring中找对应的Bean***
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
-        //***创建HandlerExecutionChain（handler+interceptor）***
+        //***添加拦截器***
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 		if (logger.isTraceEnabled()) {
@@ -527,23 +527,24 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	 * @return org.springframework.web.servlet.HandlerExecutionChain
 	 **/
 	protected HandlerExecutionChain getHandlerExecutionChain(Object handler, HttpServletRequest request) {
-		//***能强转就强转，不能强转就新建***
+		//***handler -> HandlerExecutionChain***
 		HandlerExecutionChain chain = (handler instanceof HandlerExecutionChain ?
 				(HandlerExecutionChain) handler : new HandlerExecutionChain(handler));
 
 		String lookupPath = this.urlPathHelper.getLookupPathForRequest(request, LOOKUP_PATH);
-		//***添加拦截器***
+		//***拦截器匹配***
 		for (HandlerInterceptor interceptor : this.adaptedInterceptors) {
-			//***能强转成MappedInterceptor就强转***
+			//***仅MappedInterceptor类型的可以用来匹配***
 			if (interceptor instanceof MappedInterceptor) {
 				MappedInterceptor mappedInterceptor = (MappedInterceptor) interceptor;
+				//匹配过程
 				if (mappedInterceptor.matches(lookupPath, this.pathMatcher)) {
-					//***HandlerExecutionChain中添加拦截器（MappedInterceptor）***
+					//***添加拦截器***
 					chain.addInterceptor(mappedInterceptor.getInterceptor());
 				}
 			}
 			else {
-				//***不能强转就原封不动添加到HandlerExecutionChain（HandlerInterceptor）***
+				//***不需要匹配的拦截器直接塞到HandlerExecutionChain中***
 				chain.addInterceptor(interceptor);
 			}
 		}
