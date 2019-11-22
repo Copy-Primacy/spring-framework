@@ -38,6 +38,13 @@ import java.io.InputStream;
  * @see InputStreamResource
  * @see ByteArrayResource
  */
+/**
+ * @Author suixuebin
+ * @Description 对资源的统一抽象
+ * @Date 17:58 2019/11/8
+ * @Param
+ * @return
+ **/
 public interface InputStreamSource {
 
 	/**

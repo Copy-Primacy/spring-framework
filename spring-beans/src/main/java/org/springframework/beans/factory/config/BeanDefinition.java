@@ -38,6 +38,13 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.beans.factory.support.RootBeanDefinition
  * @see org.springframework.beans.factory.support.ChildBeanDefinition
  */
+/**
+ * @Author suixuebin
+ * @Description 用属性来描述被注册的Bean
+ * @Date 11:37 2019/11/13
+ * @Param
+ * @return
+ **/
 public interface BeanDefinition extends AttributeAccessor, BeanMetadataElement {
 
 	/**

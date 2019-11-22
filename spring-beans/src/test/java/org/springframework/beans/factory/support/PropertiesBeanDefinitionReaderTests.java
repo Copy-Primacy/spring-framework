@@ -32,7 +32,13 @@ public class PropertiesBeanDefinitionReaderTests {
 
 	private final PropertiesBeanDefinitionReader reader = new PropertiesBeanDefinitionReader(this.beanFactory);
 
-
+    /**
+     * @Author suixuebin
+     * @Description 测试方法
+     * @Date 15:05 2019/11/18
+     * @Param []
+     * @return void
+     **/
 	@Test
 	public void withSimpleConstructorArg() {
 		this.reader.loadBeanDefinitions(new ClassPathResource("simpleConstructorArg.properties", getClass()));

@@ -318,6 +318,7 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
+		//查找classpath路径下的所有资源(jar包)
 		Set<Resource> result = doFindAllClassPathResources(path);
 		if (logger.isTraceEnabled()) {
 			logger.trace("Resolved classpath location [" + location + "] to resources " + result);
@@ -488,7 +489,17 @@ public class PathMatchingResourcePatternResolver implements ResourcePatternResol
 	 * @see #doFindPathMatchingFileResources
 	 * @see org.springframework.util.PathMatcher
 	 */
+	/**
+	 * @Author suixuebin
+	 * @Description 解析路径中包含通配符的情况
+	 * 确定目录，获取该目录下得所有资源。
+	 * 在所获得的所有资源后，进行迭代匹配获取我们想要的资源。
+	 * @Date 9:26 2019/11/11
+	 * @Param [locationPattern]
+	 * @return org.springframework.core.io.Resource[]
+	 **/
 	protected Resource[] findPathMatchingResources(String locationPattern) throws IOException {
+		//确定根目录，只保留通配符前一个“/”之前的内容
 		String rootDirPath = determineRootDir(locationPattern);
 		String subPattern = locationPattern.substring(rootDirPath.length());
 		Resource[] rootDirResources = getResources(rootDirPath);

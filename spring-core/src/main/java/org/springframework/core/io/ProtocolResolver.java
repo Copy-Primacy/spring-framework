@@ -29,6 +29,13 @@ import org.springframework.lang.Nullable;
  * @since 4.3
  * @see DefaultResourceLoader#addProtocolResolver
  */
+/**
+ * @Author suixuebin
+ * @Description 实现此接口，用户可以自定义协议资源解决策略
+ * @Date 15:04 2019/11/7
+ * @Param
+ * @return
+ **/
 @FunctionalInterface
 public interface ProtocolResolver {
 

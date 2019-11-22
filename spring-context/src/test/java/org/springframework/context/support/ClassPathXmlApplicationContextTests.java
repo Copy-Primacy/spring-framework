@@ -322,7 +322,13 @@ public class ClassPathXmlApplicationContextTests {
 		assertThat(beansOfType.size()).isEqualTo(1);
 		assertThat(beansOfType.values().iterator().next()).isSameAs(myMessageSource);
 	}
-
+    /**
+     * @Author suixuebin
+     * @Description 测试方法
+     * @Date 10:10 2019/11/18
+     * @Param []
+     * @return void
+     **/
 	@Test
 	public void testResourceAndInputStream() throws IOException {
 		ClassPathXmlApplicationContext ctx = new ClassPathXmlApplicationContext(RESOURCE_CONTEXT) {

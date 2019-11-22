@@ -39,6 +39,13 @@ import org.springframework.util.ResourceUtils;
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ResourceLoaderAware
  */
+/**
+ * @Author suixuebin
+ * @Description 资源加载统一接口
+ * @Date 18:08 2019/11/8
+ * @Param
+ * @return
+ **/
 public interface ResourceLoader {
 
 	/** Pseudo URL prefix for loading from the class path: "classpath:". */
@@ -64,6 +71,15 @@ public interface ResourceLoader {
 	 * @see Resource#exists()
 	 * @see Resource#getInputStream()
 	 */
+	/**
+	 * @Author suixuebin
+	 * @Description 加载资源的核心方法
+	 * 根据地址加载资源，并封装成Resource
+	 * 加载资源分为网络路径，绝对路径，相对路径
+	 * @Date 18:11 2019/11/8
+	 * @Param [location]
+	 * @return org.springframework.core.io.Resource
+	 **/
 	Resource getResource(String location);
 
 	/**
@@ -76,6 +92,13 @@ public interface ResourceLoader {
 	 * @see org.springframework.util.ClassUtils#getDefaultClassLoader()
 	 * @see org.springframework.util.ClassUtils#forName(String, ClassLoader)
 	 */
+	/**
+	 * @Author suixuebin
+	 * @Description 使用 ClassLoader也可以加载相关资源
+	 * @Date 8:32 2019/11/11
+	 * @Param []
+	 * @return java.lang.ClassLoader
+	 **/
 	@Nullable
 	ClassLoader getClassLoader();
 

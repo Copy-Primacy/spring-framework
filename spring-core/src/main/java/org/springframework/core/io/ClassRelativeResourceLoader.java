@@ -45,6 +45,7 @@ public class ClassRelativeResourceLoader extends DefaultResourceLoader {
 
 	@Override
 	protected Resource getResourceByPath(String path) {
+		//返回的是ClassRelativeContextResource类型。
 		return new ClassRelativeContextResource(path, this.clazz);
 	}
 

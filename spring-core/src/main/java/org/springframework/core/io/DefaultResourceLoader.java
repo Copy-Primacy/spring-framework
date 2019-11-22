@@ -45,6 +45,13 @@ import org.springframework.util.StringUtils;
  * @see FileSystemResourceLoader
  * @see org.springframework.context.support.ClassPathXmlApplicationContext
  */
+/**
+ * @Author suixuebin
+ * @Description 对“资源加载器“的统一实现
+ * @Date 8:33 2019/11/11
+ * @Param
+ * @return
+ **/
 public class DefaultResourceLoader implements ResourceLoader {
 
 	@Nullable
@@ -105,6 +112,13 @@ public class DefaultResourceLoader implements ResourceLoader {
 	 * @since 4.3
 	 * @see #getProtocolResolvers()
 	 */
+	/**
+	 * @Author suixuebin
+	 * @Description 添加用户自定义的资源解决策略
+	 * @Date 15:06 2019/11/7
+	 * @Param [resolver]
+	 * @return void
+	 **/
 	public void addProtocolResolver(ProtocolResolver resolver) {
 		Assert.notNull(resolver, "ProtocolResolver must not be null");
 		this.protocolResolvers.add(resolver);
@@ -143,23 +157,26 @@ public class DefaultResourceLoader implements ResourceLoader {
 	@Override
 	public Resource getResource(String location) {
 		Assert.notNull(location, "Location must not be null");
-
+        //使用ProtocolResolver 加载资源（用户自定义策略，优先级最高）
 		for (ProtocolResolver protocolResolver : this.protocolResolvers) {
 			Resource resource = protocolResolver.resolve(location, this);
 			if (resource != null) {
 				return resource;
 			}
 		}
-
+        //根据不同的情况，使用不同的加载策略
 		if (location.startsWith("/")) {
+			//相对路径
 			return getResourceByPath(location);
 		}
 		else if (location.startsWith(CLASSPATH_URL_PREFIX)) {
+			//绝对路径
 			return new ClassPathResource(location.substring(CLASSPATH_URL_PREFIX.length()), getClassLoader());
 		}
 		else {
 			try {
 				// Try to parse the location as a URL...
+				//网络路径
 				URL url = new URL(location);
 				return (ResourceUtils.isFileURL(url) ? new FileUrlResource(url) : new UrlResource(url));
 			}

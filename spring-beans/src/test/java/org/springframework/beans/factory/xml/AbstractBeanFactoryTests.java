@@ -203,7 +203,13 @@ public abstract class AbstractBeanFactoryTests {
 		TestBean dad = (TestBean) getBeanFactory().getBean("father");
 		assertThat(dad.getName().equals("Albert")).as("Dad has correct name").isTrue();
 	}
-
+    /**
+     * @Author suixuebin
+     * @Description 调试方法：3
+     * @Date 11:23 2019/11/13
+     * @Param []
+     * @return void
+     **/
 	@Test
 	public void factorySingleton() throws Exception {
 		assertThat(getBeanFactory().isSingleton("&singletonFactory")).isTrue();

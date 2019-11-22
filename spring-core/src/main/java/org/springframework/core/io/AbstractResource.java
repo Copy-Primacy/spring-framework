@@ -43,6 +43,13 @@ import org.springframework.util.ResourceUtils;
  * @author Sam Brannen
  * @since 28.12.2003
  */
+/**
+ * @Author suixuebin
+ * @Description 对资源的通用（默认）操作实现
+ * @Date 18:01 2019/11/8
+ * @Param
+ * @return
+ **/
 public abstract class AbstractResource implements Resource {
 
 	private static final LogAccessor logAccessor = new LogAccessor(AbstractResource.class);

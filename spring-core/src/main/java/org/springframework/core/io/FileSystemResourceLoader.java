@@ -51,6 +51,7 @@ public class FileSystemResourceLoader extends DefaultResourceLoader {
 		if (path.startsWith("/")) {
 			path = path.substring(1);
 		}
+		//返回的是FileSystemContextResource类型
 		return new FileSystemContextResource(path);
 	}
 
@@ -59,6 +60,14 @@ public class FileSystemResourceLoader extends DefaultResourceLoader {
 	 * FileSystemResource that explicitly expresses a context-relative path
 	 * through implementing the ContextResource interface.
 	 */
+	/**
+	 * @Author suixuebin
+	 * @Description 使用内部类+接口的方式，解决了 Java中的多继承问题。
+	 * 相当于在类中添加了一个小的模块，去解决一部分问题，并且对原本的类不产生影响。
+	 * @Date 8:57 2019/11/11
+	 * @Param
+	 * @return
+	 **/
 	private static class FileSystemContextResource extends FileSystemResource implements ContextResource {
 
 		public FileSystemContextResource(String path) {

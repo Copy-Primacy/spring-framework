@@ -28,6 +28,13 @@ import org.xml.sax.InputSource;
  * @since 2.0
  * @see DefaultDocumentLoader
  */
+/**
+ * @Author suixuebin
+ * @Description 对Xml文件进行解析
+ * @Date 10:20 2019/11/11
+ * @Param
+ * @return
+ **/
 public interface DocumentLoader {
 
 	/**

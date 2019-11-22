@@ -64,7 +64,13 @@ public class XmlBeanDefinitionReaderTests {
 		reader.loadBeanDefinitions(resource);
 		testBeanDefinitions(registry);
 	}
-
+    /**
+     * @Author suixuebin
+     * @Description 调试方法：2
+     * @Date 16:16 2019/11/11
+     * @Param []
+     * @return void
+     **/
 	@Test
 	public void withImport() {
 		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
@@ -98,11 +104,20 @@ public class XmlBeanDefinitionReaderTests {
 		reader.loadBeanDefinitions(resource);
 		testBeanDefinitions(registry);
 	}
-
+    /**
+     * @Author suixuebin
+     * @Description 调试方法：1
+     * @Date 16:16 2019/11/11
+     * @Param []
+     * @return void
+     **/
 	@Test
 	public void withFreshInputStream() {
+		//new了一个空的注册器
 		SimpleBeanDefinitionRegistry registry = new SimpleBeanDefinitionRegistry();
+		//将加载的资源名称封装到Resource
 		Resource resource = new ClassPathResource("test.xml", getClass());
+		//资源读取
 		new XmlBeanDefinitionReader(registry).loadBeanDefinitions(resource);
 		testBeanDefinitions(registry);
 	}

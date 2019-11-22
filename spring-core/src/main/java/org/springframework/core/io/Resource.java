@@ -49,6 +49,13 @@ import org.springframework.lang.Nullable;
  * @see ByteArrayResource
  * @see InputStreamResource
  */
+/**
+ * @Author suixuebin
+ * @Description 对资源的通用（默认）操作接口
+ * @Date 17:58 2019/11/8
+ * @Param
+ * @return
+ **/
 public interface Resource extends InputStreamSource {
 
 	/**

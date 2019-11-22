@@ -51,6 +51,13 @@ import org.springframework.core.io.ResourceLoader;
  * @see org.springframework.context.ApplicationContext
  * @see org.springframework.context.ResourceLoaderAware
  */
+/**
+ * @Author suixuebin
+ * @Description 可以根基location一次返回多个Resource资源，解决只能一对一的问题。
+ * @Date 9:06 2019/11/11
+ * @Param
+ * @return
+ **/
 public interface ResourcePatternResolver extends ResourceLoader {
 
 	/**
@@ -60,6 +67,13 @@ public interface ResourcePatternResolver extends ResourceLoader {
 	 * for example in the root of all deployed JAR files.
 	 * @see org.springframework.core.io.ResourceLoader#CLASSPATH_URL_PREFIX
 	 */
+	/**
+	 * @Author suixuebin
+	 * @Description 新的协议
+	 * @Date 15:22 2019/11/7
+	 * @Param
+	 * @return
+	 **/
 	String CLASSPATH_ALL_URL_PREFIX = "classpath*:";
 
 	/**
@@ -71,6 +85,13 @@ public interface ResourcePatternResolver extends ResourceLoader {
 	 * @return the corresponding Resource objects
 	 * @throws IOException in case of I/O errors
 	 */
+	/**
+	 * @Author suixuebin
+	 * @Description 支持根据指定的资源路径匹配模式每次返回多个资源实例
+	 * @Date 15:20 2019/11/7
+	 * @Param [locationPattern]
+	 * @return org.springframework.core.io.Resource[]
+	 **/
 	Resource[] getResources(String locationPattern) throws IOException;
 
 }
